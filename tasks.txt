@@ -1,0 +1,22 @@
+#1 Popular times of travel (i.e., occurs most often in the start time)
+
+    What is the most common month?
+    What is the most common day of week?
+    What is the most common hour of day?
+
+#2 Popular stations and trip
+
+    What is the most common start station?
+    What is the most common end station?
+    What is the most common trip from start to end (i.e., most frequent combination of start station and end station)?
+
+#3 Trip duration
+
+    What is the total travel time for users in different cities?
+    What is the average travel time for users in different cities?
+
+#4 User info
+
+    What are the counts of each user type?
+    What are the counts of each gender (only available for NYC and Chicago)?
+    What are the earliest, most recent, most common year of birth (only available for NYC and Chicago)?
