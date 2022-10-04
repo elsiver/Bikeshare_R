@@ -67,12 +67,10 @@ chi$Start.Time <- as.Date(chi$Start.Time)
 month_count_chi <- table(months(chi$Start.Time))
 max_month_chi <- subset(month_count_chi, month_count_chi==max(month_count_chi))
 max_month_chi
-
 wash$Start.Time <- as.Date(wash$Start.Time)
 month_count_wash <- table(months(wash$Start.Time))
 max_month_wash <- subset(month_count_wash, month_count_wash==max(month_count_wash))
 max_month_wash
-
 ny$Start.Time <- as.Date(ny$Start.Time)
 month_count_ny <- table(months(ny$Start.Time))
 max_month_ny <- subset(month_count_ny, month_count_ny==max(month_count_ny))
@@ -93,12 +91,10 @@ ny$Start.Time <- as.Date(ny$Start.Time)
 day_count_ny <- table(weekdays(ny$Start.Time))
 max_day_ny <- subset(day_count_ny, day_count_ny==max(day_count_ny))
 max_day_ny
-
 wash$Start.Time <- as.Date(wash$Start.Time)
 day_count_wash <- table(weekdays(wash$Start.Time))
 max_day_wash <- subset(day_count_wash, day_count_wash==max(day_count_wash))
 max_day_wash
-
 chi$Start.Time <- as.Date(chi$Start.Time)
 day_count_chi <- table(weekdays(chi$Start.Time))
 max_day_chi <- subset(day_count_chi, day_count_chi==max(day_count_chi))
@@ -108,8 +104,14 @@ max_day_chi
 
 max_day <- rbind(day_count_ny,day_count_chi, day_count_wash)
 max_day
-barplot(max_day, main="max_day", ylab="count", col=terrain.colors(3), beside=T)
-legend(2, 60000, legend=c("ny", "chi", "wash"), fill=terrain.colors(3))
+class(max_day)
+
+barplot(max_day,
+        main="max_day",
+        ylab="count",
+        col=terrain.colors(3),
+        beside=T)
+legend(2, 15000, legend=c("ny", "chi", "wash"), fill=terrain.colors(3))
 
 
 # ----------------------------------------------
@@ -129,10 +131,8 @@ subset(table(chi$End.Station), table(chi$End.Station)==max(table(chi$End.Station
 # trip
 ny$trip <- paste(ny$Start.Station, ny$End.Station)
 subset(table(ny$trip), table(ny$trip)==max(table(ny$trip)))
-
 chi$trip <- paste(chi$Start.Station, chi$End.Station)
 subset(table(chi$trip), table(chi$trip)==max(table(chi$trip)))
-
 wash$trip <- paste(wash$Start.Station, wash$End.Station)
 subset(table(wash$trip), table(wash$trip)==max(table(wash$trip)))
 
@@ -145,22 +145,18 @@ total.trip <- sum(ny$Trip.Duration)
 total.trip
 avg.trip <- mean(ny$Trip.Duration)
 avg.trip
-
 total_y <- total.trip%/%(365*24*60*60)
 total_y
 rest_y <- total.trip%%(365*24*60*60)
 rest_y
-
 total_d <- rest_y%/%(60*60*24)
 total_d
 rest_d <- rest_y%%(60*60*24)
 rest_d
-
 total_h <- rest_d%/%(60*60)
 total_h
 rest_h <- rest_d%%(60*60)
 rest_h
-
 total_min <- rest_h%/%(60)
 total_min
 rest_sec <- rest_h%%(60)
@@ -184,35 +180,45 @@ ny_type <- data.frame(table(ny$User.Type))
 chi_type <- data.frame(table(chi$User.Type))
 wash_type <- data.frame(table(wash$User.Type))
 
-barplot(table(ny$User.Type), table(chi$User.Type), table(wash$User.Type))
-
 # plot ---------
 
 ny_chi_merge <- merge.data.frame(ny_type, chi_type, by = "Var1" , all=T)
 all_merge <- merge.data.frame(ny_chi_merge, wash_type, by = "Var1", all=T)
 colnames(all_merge) <- c("user_type","ny","chi","wash")
 all_merge
+rownames(all_merge) <- all_merge$user_type
+rownames(all_merge)[1] <- 'not_specified'
+all_merge[1] <- NULL
+all_merge
 
-
-barplot(all_merge, main="user_type", ylab="count", col=terrain.colors(3), beside=T)
-legend(2, 60000, legend=c("ny", "chi", "wash"), fill=terrain.colors(3))
-
-barplot(table(ny$User.Type), )
-
-
-ggplot(aes(x="Customer"), data=ny_type) + geom_bar()
-
+barplot(t(as.matrix(all_merge)),
+        main="user types per city",
+        ylab="count",
+        col=terrain.colors(3),
+        beside=TRUE)
+legend(2, 100000, legend=c("ny", "chi", "wash"), fill=terrain.colors(3))
 
 
 # counts of gender
 table(ny$Gender)
 table(chi$Gender)
 
+gender_ny_chi <- rbind(table(ny$Gender), table(chi$Gender))
+colnames(gender_ny_chi)[1] <- 'not_specified'
+gender_ny_chi
+barplot(gender_ny_chi,
+        col=terrain.colors(2),
+        beside=T,
+        ylab='count',
+        main='gender count per city')
+legend(2, 150000, legend=c("ny", "chi"), fill=terrain.colors(2))
+
+
+
 # most common bday
 bd_count_ny <- table(ny$Birth.Year)
 most_common_bd_ny <- subset(bd_count_ny, bd_count_ny==max(bd_count_ny))
 most_common_bd_ny
-
 bd_count_chi <- table(chi$Birth.Year)
 most_common_bd_chi <- subset(bd_count_chi, bd_count_chi==max(bd_count_chi))
 most_common_bd_chi
@@ -226,287 +232,3 @@ max(na.omit(chi$Birth.Year))
 min(na.omit(ny$Birth.Year))
 min(na.omit(chi$Birth.Year))
 
-
-
-```{r Faceting}
-
-ggplot(aes(x=dob_day,y=..density..), data=pf)+
-  geom_histogram(binwidth=1)+
-  scale_x_continuous(breaks=1:31)+
-  facet_wrap(~gender, ncol=3)
-
-ggplot(aes(x=dob_day,y=..density..), data=pf)+
-  geom_histogram(binwidth=1)+
-  scale_x_continuous(breaks=1:31)+
-  facet_grid(dob_month~gender)
-
-```
-
-
-### Friend Count
-```{r Friend Count}
-
-ggplot(aes(x=friend_count, y=..density..), data=pf)+
-  geom_histogram(binwidth=1)+
-  scale_x_continuous()
-```
-### Limiting the Axes + Exploring with Bin Width
-
-
-```{r Limiting the Axes}
-qplot(x = friend_count, data = pf, binwidth = 10) +
-  scale_x_continuous(limits = c(0, 1000),
-                     breaks = seq(0, 1000, 50))
-```
-
-
-### Faceting Friend Count
-```{r Faceting Friend Count}
-# What code would you add to create a facet the histogram by gender?
-# Add it to the code below.
-ggplot(aes(x=friend_count),data=pf)+
-  geom_histogram(binwidth = 25)+
-  scale_x_continuous(limits=c(0,1000), breaks = seq(0,1000,50))+
-  facet_wrap(~gender)
-```
-
-***
-
-### Omitting NA Values
-Notes:
-
-```{r Omitting NA Values}
-ggplot(aes(x=friend_count),data=subset(pf, !is.na(gender)))+
-  geom_histogram(binwidth = 25)+
-  ggtitle('Histogram of Number of Friends Per Gender') +
-  labs(x = "Number of Friends") + 
-  scale_x_continuous(limits=c(0,1000), breaks = seq(0,1000,50))+
-  facet_wrap(~gender)
-```
-
-***
-
-### Statistics 'by' Gender
-Notes:
-
-```{r Statistics \'by\' Gender}
-table(pf$gender)
-
-by(pf$friend_count, pf$gender, summary)
-
-
-```
-
-#### Who on average has more friends: men or women?
-Response:
-
-#### What's the difference between the median friend count for women and men?
-Response:
-
-#### Why would the median be a better measure than the mean?
-Response:
-
-***
-
-### Tenure
-Notes:
-
-```{r Tenure}
-
-ggplot(aes(x = tenure), data = pf) +
-  geom_histogram(binwidth = 30, color = 'black', fill = '#099DD9')
-
-```
-
-***
-
-#### How would you create a histogram of tenure by year?
-
-```{r Tenure Histogram by Year}
-
-ggplot(aes(x = tenure/365), data = pf) +
-  geom_histogram(binwidth = .25, color = 'black', fill = '#F79420')
-
-```
-
-***
-
-### Labeling Plots
-Notes:
-
-```{r Labeling Plots}
-ggplot(aes(x = tenure / 365), data = pf) +
-  geom_histogram(color = 'black', fill = '#F79420') +
-  scale_x_continuous(breaks = seq(1, 7, 1), limits = c(0, 7)) +
-  xlab('Number of years using Facebook') +
-  ylab('Number of users in sample')
-```
-
-***
-
-### User Ages
-Notes:
-
-```{r User Ages}
-
-```
-
-#### What do you notice?
-Response:
-
-***
-
-### The Spread of Memes
-Notes:
-
-***
-
-### Lada's Money Bag Meme
-Notes:
-
-***
-
-### Transforming Data
-Notes:
-
-***
-
-### Add a Scaling Layer
-Notes:
-
-```{r Add a Scaling Layer}
-
-```
-
-***
-
-
-### Frequency Polygons
-
-```{r Frequency Polygons}
-
-```
-
-***
-
-### Likes on the Web
-Notes:
-
-```{r Likes on the Web}
-
-by(pf$www_likes, pf$gender, sum)
-
-
-
-```
-
-
-***
-
-### Box Plots
-Notes:
-
-```{r Box Plots}
-
-
-qplot(x = friend_count, data = subset(pf, !is.na(gender)), binwidth = 25) +
-        scale_x_continuous(limits=c(0,1000), breaks = seq(0,1000,50)) +
-        facet_wrap(~gender)
-
-# passing the geom argument allows us to change the plot type
-qplot(x = gender, y = friend_count, data = subset(pf, !is.na(gender)), geom = 'boxplot', ylim = c(0,100)) 
-
-
-# passing the geom argument allows us to change the plot type
-qplot(x = gender, y = friend_count, data = subset(pf, !is.na(gender)), 
-      geom = 'boxplot') + 
-      coord_cartesian(ylim = c(0,100)) 
-
-```
-
-#### Adjust the code to focus on users who have friend counts between 0 and 1000.
-
-```{r}
-
-```
-
-***
-
-### Scatter Plots
-Notes:
-
-```{r scatter plots}
-
-ggplot(aes(x = age, y = friend_count), data = pf) +
-  geom_point() +
-  xlim(13,90)
-
-summary(pf$age)
-
-
-```
-
-
-#### Overplottingr.
-
-```{r Overplotting}
-
-ggplot(aes(x = age, y = friend_count), data = pf) +
-  geom_point(alpha=1/20) +
-  xlim(13,90)
-
-
-
-```
-### Jitter Plots
-Notes:
-
-```{r Jitter plots}
-
-ggplot(aes(x = age, y = friend_count), data = pf) +
-  geom_jitter(alpha=1/20) +
-  xlim(13,90)
-
-
-
-
-```
-### Overlaying Summaries with Raw Data
-Notes:
-
-```{r Overlaying Summaries with Raw Data}
-
-ggplot(aes(x = age, y = friend_count), data = pf) +
-  xlim(13,90)+
-  geom_jitter(alpha=1/20,
-              position = position_jitter(h=0),
-              color='orange') +
-  coord_trans(y='sqrt')+
-  geom_line(stat='summary', fun.y=mean)+
-  geom_line(stat='summary', fun.y=quantile,
-            fun.args= list((probs = 0.1), (linetype=2), (color = 'blue')))
-
-
-
-
-```
-
-### Bivariate Plots
-Notes:
-
-```{r Bivariate Plots}
-
-ggplot(aes(x = age, y = friend_count), data = pf) +
-  xlim(13,90)+
-  geom_jitter(alpha=1/20,
-              position = position_jitter(h=0),
-              color='orange') +
-  coord_trans(y='sqrt')+
-  geom_line(stat='summary', fun.y=mean)+
-  geom_line(stat='summary', fun.y=quantile,
-            fun.args= list((probs = 0.1), (linetype=2), (color = 'blue')))
-
-
-
-
-```
